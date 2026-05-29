@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <title>CA | by Aftab</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #eef2f3, #8e9eab);
+      margin: 0;
+      padding: 40px 20px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 10px;
+      font-size: 2em;
+      background-color: #ffffffcc;
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px 2px #0ff, 0 0 30px 4px #0ff;
+    }
+    .subheading {
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 0.80rem;
+      color: #555;
+    }
+    .question {
+      margin: 20px auto;
+      max-width: 700px;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px 2px #0ff, 0 0 30px 4px #0ff;
+      transition: transform 0.2s;
+    }
+    .question:hover {
+      transform: scale(1.01);
+    }
+    .options button {
+      display: block;
+      margin: 10px 0;
+      padding: 12px 18px;
+      width: 100%;
+      border: 2px solid #0ff;
+      border-radius: 8px;
+      background: #f7f7f7;
+      cursor: pointer;
+      text-align: left;
+      font-size: 18px;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .options button:hover:not(:disabled) {
+      background-color: #e2e6ea;
+    }
+    .options button.correct {
+      background-color: #d4edda;
+      color: #155724;
+      border-color: #28a745;
+    }
+    .options button.incorrect {
+      background-color: #f8d7da;
+      color: #721c24;
+      border-color: #dc3545;
+    }
+    .options button:disabled {
+      cursor: not-allowed;
+    }
+
+    .icon {
+      margin-left: 10px;
+      animation: blink 0.8s linear infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    @keyframes fadeOut {
+      to { opacity: 0; visibility: hidden; }
+    }
+
+
+    @media (max-width: 600px) {
+      body {
+        padding: 20px 10px;
+      }
+      .question {
+        padding: 15px;
+      }
+      .options button {
+        font-size: 28px;
+        padding: 10px 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div style="text-align:center;">
+    <h1>📝 | Current Affairs Series </h1>
+  </div>
+  <div class="subheading">Af. : Welcome Khushi Pandey</div>
+  <div id="quiz"></div>
+  <div id="score" style="text-align:center; font-size:1.2rem; margin-top:30px; font-weight:bold;"></div>
+
+  <div style="text-align:center; margin-top: 20px;">
+    <button id="retryBtn" style="padding: 10px 25px; font-size: 1rem; cursor:pointer;">Retry</button>
+  </div>
+
+  <script>
+    const quizData = [
+      // (यहाँ प्रश्नों की सूची है,)
+
+{
+    q: "राष्ट्रपति कौन हैं?",
+    options: ["नरेंद्र मोदी", "द्रौपदी मुर्मू", "सी. पी. राधाकृष्णन", "राहुल गांधी"],
+    answer: "द्रौपदी मुर्मू"
+},
+{
+    q: "उपराष्ट्रपति कौन हैं?",
+    options: ["सी. पी. राधाकृष्णन", "द्रौपदी मुर्मू", "जगदीश धनखड़", "हरिवंश नारायण सिंह"],
+    answer: "सी. पी. राधाकृष्णन"
+},
+{
+    q: "भारत के प्रधानमंत्री कौन हैं?",
+    options: ["अमित शाह", "नरेंद्र मोदी", "योगी आदित्यनाथ", "राजनाथ सिंह"],
+    answer: "नरेंद्र मोदी"
+},
+{
+    q: "राज्यसभा के सभापति कौन हैं?",
+    options: ["हरिवंश नारायण सिंह", "सी. पी. राधाकृष्णन", "ओम बिरला", "प्रमोद चन्द्र मोदी"],
+    answer: "सी. पी. राधाकृष्णन"
+},
+{
+    q: "राज्यसभा के उपसभापति कौन हैं?",
+    options: ["ओम बिरला", "प्रमोद चन्द्र मोदी", "हरिवंश नारायण सिंह", "राहुल गांधी"],
+    answer: "हरिवंश नारायण सिंह"
+},
+{
+    q: "राज्यसभा के महासचिव कौन हैं?",
+    options: ["प्रमोद चन्द्र मोदी", "उत्पल कुमार सिंह", "ओम बिरला", "आर. वेंकटरमणी"],
+    answer: "प्रमोद चन्द्र मोदी"
+},
+{
+    q: "18वीं लोकसभा के अध्यक्ष कौन हैं?",
+    options: ["राहुल गांधी", "ओम बिरला", "नितिन नवीन", "द्रौपदी मुर्मू"],
+    answer: "ओम बिरला"
+},
+{
+    q: "लोकसभा में नेता विपक्ष कौन हैं?",
+    options: ["अमित शाह", "मल्लिकार्जुन खड़गे", "राहुल गांधी", "अरुण सिंह धूमल"],
+    answer: "राहुल गांधी"
+},
+{
+    q: "लोकसभा के महासचिव कौन हैं?",
+    options: ["उत्पल कुमार सिंह", "प्रमोद चन्द्र मोदी", "ओम बिरला", "हरिवंश नारायण सिंह"],
+    answer: "उत्पल कुमार सिंह"
+},
+{
+    q: "भारत के मुख्य न्यायाधीश कौन हैं?",
+    options: ["आर. वेंकटरमणी", "डी. वाई. चंद्रचूड़", "जस्टिस सूर्यकांत", "संजीव खन्ना"],
+    answer: "जस्टिस सूर्यकांत"
+},
+{
+    q: "मुख्य चुनाव आयुक्त कौन हैं?",
+    options: ["राजीव कुमार", "ज्ञानेश कुमार", "अरुण गोयल", "सुशील चंद्रा"],
+    answer: "ज्ञानेश कुमार"
+},
+{
+    q: "भारत के महान्यायवादी कौन हैं?",
+    options: ["कपिल सिब्बल", "मुकुल रोहतगी", "आर. वेंकटरमणी", "तुषार मेहता"],
+    answer: "आर. वेंकटरमणी"
+},
+{
+    q: "ISRO के नए अध्यक्ष कौन हैं?",
+    options: ["एस. सोमनाथ", "डॉ. वी. नारायणन", "के. सिवन", "समीर वी. कामत"],
+    answer: "डॉ. वी. नारायणन"
+},
+{
+    q: "DRDO के नए अध्यक्ष कौन हैं?",
+    options: ["समीर वी. कामत", "वी. नारायणन", "अरुण सिंह धूमल", "अनंत गोयनका"],
+    answer: "समीर वी. कामत"
+},
+{
+    q: "FICCI के नए अध्यक्ष कौन हैं?",
+    options: ["अनंत गोयनका", "मल्लिकार्जुन खड़गे", "अरुण सिंह धूमल", "नितिन नवीन"],
+    answer: "अनंत गोयनका"
+},
+{
+    q: "UPSC के नए अध्यक्ष कौन हैं?",
+    options: ["डॉ. अजय कुमार", "मनोज सोनी", "ज्ञानेश कुमार", "राजीव कुमार"],
+    answer: "डॉ. अजय कुमार"
+},
+{
+    q: "भारत के नए CDS कौन हैं?",
+    options: ["अनिल चौहान", "एन. एस. राजा सुब्रमणि", "मनोज पांडे", "समीर वी. कामत"],
+    answer: "एन. एस. राजा सुब्रमणि"
+},
+{
+    q: "BCCI के नए अध्यक्ष कौन हैं?",
+    options: ["जय शाह", "सौरव गांगुली", "अरुण सिंह धूमल", "मिथुन मनहास"],
+    answer: "मिथुन मनहास"
+},
+{
+    q: "IPL के नए अध्यक्ष कौन हैं?",
+    options: ["मिथुन मनहास", "अरुण सिंह धूमल", "जय शाह", "रोजर बिन्नी"],
+    answer: "अरुण सिंह धूमल"
+},
+{
+    q: "कांग्रेस के नए अध्यक्ष कौन हैं?",
+    options: ["मल्लिकार्जुन खड़गे", "राहुल गांधी", "सोनिया गांधी", "शशि थरूर"],
+    answer: "मल्लिकार्जुन खड़गे"
+},
+{
+    q: "BJP के नए अध्यक्ष कौन हैं?",
+    options: ["जे. पी. नड्डा", "अमित शाह", "नितिन नवीन", "राजनाथ सिंह"],
+    answer: "नितिन नवीन"
+}
+];
+
+    const quizContainer = document.getElementById('quiz');
+    const scoreContainer = document.getElementById('score');
+    const retryBtn = document.getElementById('retryBtn');
+
+    let correctAnswers = 0;
+    let answeredQuestions = 0;
+
+    function loadQuiz() {
+      quizContainer.innerHTML = '';
+      scoreContainer.textContent = '';
+      correctAnswers = 0;
+      answeredQuestions = 0;
+
+      quizData.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'question';
+        div.innerHTML = `<strong>Q${index + 1}. ${item.q}</strong>`;
+
+        const optionDiv = document.createElement('div');
+        optionDiv.className = 'options';
+
+        item.options.forEach(option => {
+          const btn = document.createElement('button');
+          btn.textContent = option;
+          btn.onclick = function () {
+            const buttons = optionDiv.querySelectorAll('button');
+            buttons.forEach(b => b.disabled = true);
+
+	 if (option === item.answer) {
+              btn.classList.add('correct');
+              const tick = document.createElement('span');
+              tick.className = 'icon correct';
+              tick.textContent = '💚';
+              btn.appendChild(tick);
+	      correctAnswers++;
+            } else {
+              btn.classList.add('incorrect');
+              buttons.forEach(b => {
+                if (b.textContent === item.answer) {
+                  b.classList.add('correct');
+                  const tick = document.createElement('span');
+                  tick.className = 'icon correct';
+                  tick.textContent = '💚';
+                  b.appendChild(tick);
+                }
+              });
+              const cross = document.createElement('span');
+              cross.className = 'icon incorrect';
+              cross.textContent = '❌';
+              btn.appendChild(cross);
+            }
+
+
+
+            answeredQuestions++;
+            if (answeredQuestions === quizData.length) {
+              scoreContainer.textContent = `Congratulations Laddu🎉 | You Got ${correctAnswers}/${quizData.length}`;
+               
+              // Confetti
+              confetti({
+                particleCount: 200,
+                spread: 100,
+                origin: { y: 0.6 }
+              });
+
+          
+            }
+          };
+          optionDiv.appendChild(btn);
+        });
+
+        div.appendChild(optionDiv);
+        quizContainer.appendChild(div);
+      });
+    }
+
+    loadQuiz();
+
+    retryBtn.onclick = () => {
+      loadQuiz();
+      window.scrollTo(0, 0);
+    };
+  </script>
+</body>
+</html>
